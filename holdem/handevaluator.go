@@ -161,10 +161,10 @@ func Evaluate7CardByMask(cardMask uint64) (evRes EvaluatorRes) {
 				handIndexs := make([]uint64, 5)
 				for i := 0; i < 5; i++ {
 					rank := uint64(0)
-					if straightTable[sc] >= uint64(i) {
-						rank = straightTable[sc] - uint64(i)
+					if straightTable[ss] >= uint64(i) {
+						rank = straightTable[ss] - uint64(i)
 					} else {
-						rank = straightTable[sc] + 13 - uint64(i)
+						rank = straightTable[ss] + 13 - uint64(i)
 					}
 					handIndexs[i] = rank + spadeOffset
 				}
@@ -172,6 +172,7 @@ func Evaluate7CardByMask(cardMask uint64) (evRes EvaluatorRes) {
 				return evRes
 			}
 			evRes.Value = handtypeValueFlush + (topFiveCardsTable[ss])
+			evRes.MaxHands = top5CardDesc(topFiveCardsTable[ss], spadeOffset)
 		} else if nBitsTable[sc] >= 5 {
 			if straightTable[sc] != 0 {
 				evRes.Value = handtypeValueStraightFlush + (straightTable[sc] << topCardShift)
@@ -189,16 +190,17 @@ func Evaluate7CardByMask(cardMask uint64) (evRes EvaluatorRes) {
 				return evRes
 			}
 			evRes.Value = handtypeValueFlush + (topFiveCardsTable[sc])
+			evRes.MaxHands = top5CardDesc(topFiveCardsTable[sc], clubOffset)
 		} else if nBitsTable[sd] >= 5 {
 			if straightTable[sd] != 0 {
 				evRes.Value = handtypeValueStraightFlush + (straightTable[sd] << topCardShift)
 				handIndexs := make([]uint64, 5)
 				for i := 0; i < 5; i++ {
 					rank := uint64(0)
-					if straightTable[sc] >= uint64(i) {
-						rank = straightTable[sc] - uint64(i)
+					if straightTable[sd] >= uint64(i) {
+						rank = straightTable[sd] - uint64(i)
 					} else {
-						rank = straightTable[sc] + 13 - uint64(i)
+						rank = straightTable[sd] + 13 - uint64(i)
 					}
 					handIndexs[i] = rank + diamondOffset
 				}
@@ -206,16 +208,17 @@ func Evaluate7CardByMask(cardMask uint64) (evRes EvaluatorRes) {
 				return evRes
 			}
 			evRes.Value = handtypeValueFlush + (topFiveCardsTable[sd])
+			evRes.MaxHands = top5CardDesc(topFiveCardsTable[sd], diamondOffset)
 		} else if nBitsTable[sh] >= 5 {
 			if straightTable[sh] != 0 {
 				evRes.Value = handtypeValueStraightFlush + (straightTable[sh] << topCardShift)
 				handIndexs := make([]uint64, 5)
 				for i := 0; i < 5; i++ {
 					rank := uint64(0)
-					if straightTable[sc] >= uint64(i) {
-						rank = straightTable[sc] - uint64(i)
+					if straightTable[sh] >= uint64(i) {
+						rank = straightTable[sh] - uint64(i)
 					} else {
-						rank = straightTable[sc] + 13 - uint64(i)
+						rank = straightTable[sh] + 13 - uint64(i)
 					}
 					handIndexs[i] = rank + heartOffset
 				}
@@ -223,6 +226,7 @@ func Evaluate7CardByMask(cardMask uint64) (evRes EvaluatorRes) {
 				return evRes
 			}
 			evRes.Value = handtypeValueFlush + (topFiveCardsTable[sh])
+			evRes.MaxHands = top5CardDesc(topFiveCardsTable[sh], heartOffset)
 		} else {
 			st := straightTable[ranks]
 			if st != 0 {
@@ -409,4 +413,15 @@ func cardsDesc(handIndexs []uint64) []string {
 		handDesc[i] = cardTable[handIndex]
 	}
 	return handDesc
+}
+
+func top5CardDesc(top5 uint64, colorOffset int) (cards []string) {
+	for i := 0; top5 != 0; i++ {
+		rank := (top5 & 0xf)
+		if rank != 0 {
+			cards = append(cards, cardTable[int(rank)+colorOffset])
+		}
+		top5 = top5 >> 4
+	}
+	return
 }
